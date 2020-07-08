@@ -9,7 +9,7 @@
       <h4>Your Selected date is: {{ value}} of march</h4>
     </div>
     <div>
-      <l-map ref="mymap" @ready="initmap" :zoom = "zoom" :center="center" style="height:500px">
+      <l-map ref="mymap" @ready="initmap" :zoom="zoom" :center="center" style="height:500px">
         <l-tile-layer :url="url"></l-tile-layer>
         <l-geo-json :geojson="geojsondata" :options="options"></l-geo-json>
       </l-map>
@@ -33,11 +33,11 @@ export default {
     return {
       name: "LeafLet",
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      zoom: 15,
+      zoom: 8,
       center: [18.5204, 73.8567],
       geojsondata: data,
       dates: ["08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18"],
-      value: null,
+      value: "08",
       fillColor: "#e4ce7f",
       sliderOption: {
         dotSize: 15,
@@ -74,9 +74,17 @@ export default {
         : "#2ca25f";
     },
     updatedMap(value) {
-      this.value = value;
+      
+      if(value == 8 || value == 9){
+        this.value = "0"+value;
+      }
+      else{
+        this.value = value;
+      }
+      console.log('value', value)
       let option = {
-        style: this.styleFunction
+        style: this.styleFunction,
+        onEachFeature: this.onEachFeatureFunction
       };
       L.geoJSON(this.geojsondata, option).addTo(this.map);
     }
@@ -84,7 +92,8 @@ export default {
   computed: {
     options() {
       return {
-        style: this.styleFunction
+        style: this.styleFunction,
+        onEachFeature: this.onEachFeatureFunction
       };
     },
     styleFunction() {
@@ -98,6 +107,18 @@ export default {
           dashArray: "3",
           fillOpacity: 0.7
         };
+      };
+    },
+    onEachFeatureFunction() {
+      return (feature, layer) => {
+        layer.bindTooltip(
+          "<div>Ward Name:" +
+            feature.properties.ward_name +
+            "</div><div>no of case: " +
+            feature.properties.covid_04_08 +
+            "</div>",
+          { permanent: false, sticky: true }
+        );
       };
     }
   }
